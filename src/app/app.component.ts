@@ -3,6 +3,7 @@ import { Category } from './models/category';
 import { Item } from './models/item';
 import { MenuService } from './services/menu.service';
 import { CartItem } from './models/cart-item';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -12,7 +13,17 @@ import { CartItem } from './models/cart-item';
 export class AppComponent {
   categories: Category[] = [];
   items: Item[] = [];
-  selectedCategoryId: string | null = null;
+  selectedCategoryId$ = new BehaviorSubject<string | null>(null);
+  filteredItems$ = combineLatest([
+    this.menuService.items$,
+    this.selectedCategoryId$
+  ]).pipe(
+    map(([items, categoryId]) => {
+      if (!categoryId) return [];
+      return items.filter(item => item.categoryId === categoryId);
+    })
+  );
+  
   categories$ = this.menuService.categories$;
   items$ = this.menuService.items$;
 
@@ -27,8 +38,8 @@ export class AppComponent {
   }
 
   selectCategory(category: Category) {
-    this.selectedCategoryId = category.id;
-    this.items = this.menuService.getItemsByCategory(category.id);
+    this.selectedCategoryId$.next(category.id);
+    // this.items = this.menuService.getItemsByCategory(category.id);
   }
 
   addToCart(item: Item) {

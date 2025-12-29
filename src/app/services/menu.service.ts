@@ -15,6 +15,8 @@ export class MenuService {
 
   categories$ = this.categoriesSubject.asObservable();
   items$ = this.itemsSubject.asObservable();
+  items:Item[] = [];
+  categories:Category[] = [];
 
   loadMenu() {
     return forkJoin({
@@ -28,27 +30,14 @@ export class MenuService {
             name: value.categoryName
           })
         );
+        this.categories = mappedCategories;
+        this.items = items;
   
         this.categoriesSubject.next(mappedCategories);
         this.itemsSubject.next(items);
       })
     );
   }
-  
-
-
-  categories: Category[] = [
-    { id: "1", name: 'Burgers' },
-    { id: "2", name: 'Fries' },
-    { id: "3", name: 'Drinks' }
-  ];
-
-  items: Item[] = [
-    { id: 1, categoryId: "1", name: 'Big Mac', price: 5, stock: 0 , imageUrl : "https://5.imimg.com/data5/SELLER/Default/2025/2/492380758/DX/BH/GM/82981234/redbull-kratingdaeng.jpeg" },
-    { id: 2, categoryId: "1", name: 'McChicken', price: 4, stock: 8  , imageUrl : "https://5.imimg.com/data5/SELLER/Default/2025/2/492380758/DX/BH/GM/82981234/redbull-kratingdaeng.jpeg"},
-    { id: 3, categoryId: "1", name: 'Fries - Small', price: 2, stock: 15 , imageUrl: "https://5.imimg.com/data5/SELLER/Default/2025/2/492380758/DX/BH/GM/82981234/redbull-kratingdaeng.jpeg" },
-    { id: 4, categoryId: "1", name: 'Fries - Large', price: 3, stock: 12 , imageUrl : "https://5.imimg.com/data5/SELLER/Default/2025/2/492380758/DX/BH/GM/82981234/redbull-kratingdaeng.jpeg" }
-  ];
 
   getCategories() {
     return this.categories;

@@ -7,7 +7,7 @@
     <div
       *ngFor="let cat of categories$ | async"
       (click)="selectCategory(cat)"
-      [class.active]="cat.id === selectedCategoryId"
+      [class.active]="(selectedCategoryId$ | async) === cat.id"
       class="category-btn"
     >
       {{ cat.name }}
@@ -18,11 +18,11 @@
   <div class="items-grid-section">
     <div class="items-grid">
       
-      <div *ngIf="!selectedCategoryId" class="placeholder">
+      <div *ngIf="!(selectedCategoryId$ | async)" class="placeholder">
         Please select a category
       </div>
 
-      <div *ngFor="let item of items$ | async" class="item-card">
+      <div *ngFor="let item of filteredItems$ | async" class="item-card">
 
         <!-- Image -->
         <img
