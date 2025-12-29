@@ -5,7 +5,7 @@
     <h3>Categories</h3>
 
     <div
-      *ngFor="let cat of categories"
+      *ngFor="let cat of categories$ | async"
       (click)="selectCategory(cat)"
       [class.active]="cat.id === selectedCategoryId"
       class="category-btn"
@@ -22,7 +22,7 @@
         Please select a category
       </div>
 
-      <div *ngFor="let item of items" class="item-card">
+      <div *ngFor="let item of items$ | async" class="item-card">
 
         <!-- Image -->
         <img

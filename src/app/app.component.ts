@@ -12,7 +12,10 @@ import { CartItem } from './models/cart-item';
 export class AppComponent {
   categories: Category[] = [];
   items: Item[] = [];
-  selectedCategoryId: number | null = null;
+  selectedCategoryId: string | null = null;
+  categories$ = this.menuService.categories$;
+  items$ = this.menuService.items$;
+
 
   cart: CartItem[] = [];
   selectedPaymentMethod: 'UPI' | 'CASH' | null = null;
@@ -20,7 +23,7 @@ export class AppComponent {
   constructor(private menuService: MenuService) {}
 
   ngOnInit() {
-    this.categories = this.menuService.getCategories();
+    this.menuService.loadMenu().subscribe();
   }
 
   selectCategory(category: Category) {

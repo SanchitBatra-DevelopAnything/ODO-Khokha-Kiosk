@@ -1,6 +1,6 @@
 export interface Item {
     id: number;
-    categoryId: number;
+    categoryId: string;
     name: string;
     price: number;
     stock: number;
