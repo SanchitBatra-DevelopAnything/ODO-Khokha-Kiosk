@@ -104,6 +104,8 @@ export class AppComponent {
         this.apiService.placeOrder('Store1', date , orderPayload).subscribe({
           next: () => {
             alert(`Order placed successfully with payment method: ${this.selectedPaymentMethod}`);
+            // ✅ REFRESH MENU (updated stock)
+            this.menuService.loadMenu().subscribe();
             this.cart = [];
             this.selectedPaymentMethod = null;
           },
