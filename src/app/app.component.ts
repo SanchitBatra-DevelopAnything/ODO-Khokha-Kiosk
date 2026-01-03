@@ -4,6 +4,7 @@ import { Item } from './models/item';
 import { MenuService } from './services/menu.service';
 import { CartItem } from './models/cart-item';
 import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import { OrderPayload } from './models/orderPayload';
 
 @Component({
   selector: 'app-root',
@@ -87,6 +88,14 @@ export class AppComponent {
       return;
     }
   
+    if (this.cart.length === 0) {
+      alert('Cart is empty');
+      return;
+    }
+
+    const payload = this.buildOrderPayload();
+    //api call to place order here.....
+  
     alert(`Order placed successfully with payment method: ${this.selectedPaymentMethod}`);
     this.cart = [];
     this.selectedPaymentMethod = null;
@@ -102,6 +111,22 @@ export class AppComponent {
     const qtyInCart = cartItem ? cartItem.quantity : 0;
     return item.stock === 0 || qtyInCart >= item.stock;
   }
+
+  buildOrderPayload(): OrderPayload {
+    const items = this.cart.map(ci => ({
+      itemId: ci.item.id,
+      itemName: ci.item.name,
+      quantity: ci.quantity,
+      totalAmount: ci.item.price * ci.quantity
+    }));
+  
+    return {
+      items,
+      orderTotal: this.total,
+      paymentType: this.selectedPaymentMethod!
+    };
+  }
+  
   
   
 }
