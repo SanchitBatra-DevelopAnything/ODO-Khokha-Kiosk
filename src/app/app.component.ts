@@ -5,6 +5,7 @@ import { MenuService } from './services/menu.service';
 import { CartItem } from './models/cart-item';
 import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import { OrderPayload } from './models/orderPayload';
+import { ApiService } from './services/api.service';
 
 @Component({
   selector: 'app-root',
@@ -32,7 +33,7 @@ export class AppComponent {
   cart: CartItem[] = [];
   selectedPaymentMethod: 'UPI' | 'CASH' | null = null;
 
-  constructor(private menuService: MenuService) {}
+  constructor(private menuService: MenuService , private apiService:ApiService) {}
 
   ngOnInit() {
     this.menuService.loadMenu().subscribe();
@@ -92,14 +93,33 @@ export class AppComponent {
       alert('Cart is empty');
       return;
     }
-
-    const payload = this.buildOrderPayload();
-    //api call to place order here.....
   
-    alert(`Order placed successfully with payment method: ${this.selectedPaymentMethod}`);
-    this.cart = [];
-    this.selectedPaymentMethod = null;
+    const orderPayload = this.buildOrderPayload();
+    const stockPayload = this.buildStockUpdatePayload(orderPayload, 'Store1');
+    const date = this.getTodayDate(); // DD-MM-YYYY
+  
+    this.apiService.decrementStock(stockPayload).subscribe({
+      next: () => {
+        // ✅ Stock successfully decremented → place order
+        this.apiService.placeOrder('Store1', date , orderPayload).subscribe({
+          next: () => {
+            alert(`Order placed successfully with payment method: ${this.selectedPaymentMethod}`);
+            this.cart = [];
+            this.selectedPaymentMethod = null;
+          },
+          error: (err) => {
+            console.error('Order placement failed', err);
+            alert(`Order failed. Error code: ${err?.status || 'UNKNOWN'}`);
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Stock decrement failed', err);
+        alert(`Stock update failed. Error code: ${err?.status || 'UNKNOWN'}`);
+      }
+    });
   }
+  
 
   getImageUrl(name: string) {
     const query = encodeURIComponent(name + " food item");
@@ -126,6 +146,27 @@ export class AppComponent {
       paymentType: this.selectedPaymentMethod!
     };
   }
+
+  buildStockUpdatePayload(orderPayload: any, storeId: string) {
+    return {
+      storeId: storeId,
+      items: orderPayload.items.map((item: any) => ({
+        itemId: item.itemId,
+        qty: item.quantity
+      })),
+      operation: 'subtract'
+    };
+  }
+
+  getTodayDate(): string {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  }
+  
+  
   
   
   
