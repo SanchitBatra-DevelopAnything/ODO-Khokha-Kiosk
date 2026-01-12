@@ -19,4 +19,14 @@ placeOrder(storeId:string , date:string , order:OrderPayload) : Observable<any>
   {
     return this.http.post('https://updatestockforstore-jipkkwipyq-uc.a.run.app' , payload);
   }
+
+  sendSalesReport(storeId:any , date:any , operation:any) : Observable<any>
+  {
+    const payload = {
+      "storeId": storeId,
+      "date": date,
+      "operation": operation
+    }
+    return this.http.post("https://generateadminsummary-jipkkwipyq-uc.a.run.app" , payload);
+  }
 }

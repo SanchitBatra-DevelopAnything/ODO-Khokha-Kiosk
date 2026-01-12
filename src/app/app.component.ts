@@ -32,6 +32,7 @@ export class AppComponent {
 
   cart: CartItem[] = [];
   selectedPaymentMethod: 'UPI' | 'CASH' | null = null;
+  isLoading = false;
 
   constructor(private menuService: MenuService , private apiService:ApiService) {}
 
@@ -93,6 +94,7 @@ export class AppComponent {
       alert('Cart is empty');
       return;
     }
+    this.isLoading = true;
   
     const orderPayload = this.buildOrderPayload();
     const stockPayload = this.buildStockUpdatePayload(orderPayload, 'Store1');
@@ -112,7 +114,8 @@ export class AppComponent {
           error: (err) => {
             console.error('Order placement failed', err);
             alert(`Order failed. Error code: ${err?.status || 'UNKNOWN'}`);
-          }
+          },
+          complete: () => { this.isLoading = false; }
         });
       },
       error: (err) => {
@@ -165,11 +168,27 @@ export class AppComponent {
     const dd = String(today.getDate()).padStart(2, '0');
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const yyyy = today.getFullYear();
-    return `${dd}-${mm}-${yyyy}`;
+    return `${yyyy}-${mm}-${dd}`;
   }
+
+  sendSalesReport() {
+    const date = this.getTodayDate(); // DD-MM-YYYY
+    this.isLoading = true;
   
-  
-  
+    this.apiService.sendSalesReport('Store1', date, 'aggregate')
+      .subscribe({
+        next: () => {
+          alert('Sales report sent successfully');
+        },
+        error: (err) => {
+          console.error('Sales report sending failed', err);
+          alert(`Sales report sending failed. Error code: ${err?.status || 'UNKNOWN'}`);
+        },
+        complete: () => {
+          this.isLoading = false;
+        }
+      });
+  }
   
   
 }
